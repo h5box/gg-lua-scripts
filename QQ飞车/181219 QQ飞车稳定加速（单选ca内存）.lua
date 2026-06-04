@@ -1,0 +1,6 @@
+ gg.clearResults()
+  gg.searchNumber("0.27777779102;1,000.0;0.0001;-1;1::",gg.TYPE_FLOAT,false,gg.SIGN_EQUAL,0, -1)
+  gg.searchNumber("0.27777779102",gg.TYPE_FLOAT,false,gg.SIGN_EQUAL,0,-1)
+  gg.getResults(10)
+  gg.editAll("0.5",gg.TYPE_FLOAT)
+  gg.toast("情秋提示你:开启成功")

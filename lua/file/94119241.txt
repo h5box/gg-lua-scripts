@@ -1,0 +1,79 @@
+function Main0()
+SN = gg.choice({
+	 "动作美化",
+}, nil, "禁止二改")
+if SN==1 then
+	 Main1()
+end
+FX=0
+end
+
+function Main1()
+SN = gg.choice({
+	 "俄舞改影之舞",
+	 "你好改太极",
+	 "鼓掌改托马斯回旋",
+	 "你走改王牌动画",
+}, nil, "禁止二改")
+if SN==1 then
+	 HS2()
+end
+if SN==2 then
+	 HS3()
+end
+if SN==3 then
+	 HS4()
+end
+if SN==4 then
+	 HS5()
+end
+FX=0
+end
+
+function HS2()
+	 gg.clearResults()
+	 gg.setRanges(32)
+	 gg.searchNumber("2201401", gg.TYPE_DWORD, false, gg.SIGN_EQUAL, 0, -1)
+	 gg.searchNumber("", gg.TYPE_DWORD, false, gg.SIGN_EQUAL, 0, -1)
+	 gg.getResults(100)
+	 gg.editAll("2209402", gg.TYPE_DWORD)
+	 gg.toast("成功")
+	 gg.clearResults()
+end
+
+function HS3()
+	 gg.clearResults()
+	 gg.setRanges(32)
+	 gg.searchNumber("2200101", gg.TYPE_DWORD, false, gg.SIGN_EQUAL, 0, -1)
+	 gg.searchNumber("", gg.TYPE_DWORD, false, gg.SIGN_EQUAL, 0, -1)
+	 gg.getResults(100)
+	 gg.editAll("2210002", gg.TYPE_DWORD)
+	 gg.toast("成功")
+	 gg.clearResults()
+end
+
+function HS4()
+	 gg.clearResults()
+	 gg.setRanges(32)
+	 gg.searchNumber("2200301", gg.TYPE_DWORD, false, gg.SIGN_EQUAL, 0, -1)
+	 gg.searchNumber("", gg.TYPE_DWORD, false, gg.SIGN_EQUAL, 0, -1)
+	 gg.getResults(100)
+	 gg.editAll("2200306", gg.TYPE_DWORD)
+	 gg.toast("成功")
+	 gg.clearResults()
+end
+
+function HS5()
+	 gg.clearResults()
+	 gg.setRanges(32)
+	 gg.searchNumber("2200601", gg.TYPE_DWORD, false, gg.SIGN_EQUAL, 0, -1)
+	 gg.searchNumber("", gg.TYPE_DWORD, false, gg.SIGN_EQUAL, 0, -1)
+	 gg.getResults(100)
+	 gg.editAll("2206301", gg.TYPE_DWORD)
+	 gg.toast("成功")
+	 gg.clearResults()
+end
+
+
+
+Main0()

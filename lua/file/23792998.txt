@@ -1,0 +1,616 @@
+--GGlua函数全面hook方案
+--By Only
+--转载时请保留以上信息
+
+local chunk=function()
+local OG = {}--SaveUsedFunction
+for i, v in pairs(_G) do OG[i] = v end
+OG.io = {}
+OG.gg = {}
+OG.string = {}
+for i, v in pairs(io) do OG.io[i] = v end
+for i, v in pairs(string) do OG.string[i] = v end
+for i, v in pairs(gg) do OG.gg[i] = v end
+
+local OSET = {}--SaveInformation
+OSET.fullName = OG.gg.getFile()
+OSET.path = OSET.fullName:gsub("[^/]+$","")
+OSET.name = OSET.fullName:match ("[^/]+$")
+OSET.randomName = ""
+OSET.outPath = OSET.path
+
+OSET.ignoreHookGGFunction = "getLine;isVisible;setVisible"
+OSET.ignoreInvokeGGFunction = ""
+OSET.ignorePackage = "sstool.only.com.sstool"
+OSET.ignoreExit = false
+OSET.ignoreRemove = false
+OSET.ignoreAssert = false
+OSET.ignoreIo = false
+OSET.ignoreWrite = false
+OSET.ignoreAntiHook = true
+
+OSET.isHookGg = true
+OSET.isCreateLua = true
+OSET.isHookLoad = true
+OSET.isHookPcall = false
+OSET.isHookLoadfile = true
+OSET.isHookLoadOpt = true
+OSET.isHookDofile = true
+OSET.isUseRandomName = true
+OSET.isUseRandomResult = false
+OSET.isDebug = false
+
+
+OSET.VVERSION = OG.gg.VERSION
+OSET.VPACKAGE = OG.gg.PACKAGE
+OSET.VBUILD = OG.gg.BUILD
+OSET.getVERSION_INT = function ()
+  return tonumber((OSET.VVERSION:gsub("%.[0-9]+", function(A0_23)
+    A0_23 = A0_23:sub(2)
+    if #A0_23 == 1 then
+      A0_23 = "0" .. A0_23
+    end
+    return A0_23
+  end)))
+end
+
+OSET.loadTimes = 0
+OSET.msg = ""
+
+while true do
+	OG.gg.alert("欢迎使用\n\n\t\tONLY SSH函数拦截器 V3.6 (GGLUA_VERSION)\n\n\t \tQQ交流群:464257898\n")
+	OSET.setsList = {
+		"fullName",
+		"outPath",
+		"isUseRandomName",
+		"isDebug",
+
+		"VVERSION",
+		"VBUILD",
+		"VPACKAGE",
+		"ignorePackage",
+
+		"isHookLoad",
+		"isHookLoadfile",
+		"isHookDofile",
+			"isHookPcall",
+		"isHookLoadOpt",
+		
+		
+		"isHookGg",
+		"isCreateLua",
+		"ignoreHookGGFunction",
+		"ignoreInvokeGGFunction",
+		"isUseRandomResult",
+		
+
+		"ignoreAntiHook",
+		"ignoreExit",
+		"ignoreIo",
+		"ignoreWrite",
+		"ignoreAssert",
+		"ignoreRemove"
+	}
+	OSET.sets = {}
+	for k, v in ipairs(OSET.setsList) do OSET.sets[k] = OSET[v] end
+	OSET.info = gg.prompt({
+		"选择运行脚本:",
+		"选择输出文件夹:",
+		"使用随机文件名输出",
+		"调试模式",
+		
+		"GG版本号(VERSION):",
+		"GG版本号(BUILD)",
+		"GG包名(PACKAGE)",
+		"Package包名检测跳过(多个使用;分号分隔)",
+  
+		"[Load]拦截调用[导出Load载入代码,如刷文件请禁用]",
+		"[Loadfile]拦截调用[导出Loadfile载入代码,如刷文件请禁用]",
+		"[Dofile]拦截调用[导出Dofile载入代码,如刷文件请禁用]",
+		"[Pcall]拦截调用[导出Pcall载入代码,建议不要与Load同时开启]",
+		"[Load&Loadfile&Dofile&Pcall]拦截优化[防止部分刷文件脚本]",
+		
+		"GG函数调用拦截[如上面的方法无效请使用此功能,需点击脚本内具体功能]",
+		"拦截结果自动生成可用脚本[需开启GG调用拦截]",
+		"忽略拦截函数(多个使用;分号分隔)",
+		"忽略执行过程函数(多个使用;分号分隔)[如searchNumber;alert]",
+		"Results类函数随机值返回[开启上功能时使用]",
+  
+		"反拦截跳跃机制核心[务必开启]",
+		"os.exit()函数检测[弹出提示]",
+		"io.open()函数检测[弹出提示,文件操作检测]",
+		"io.open()自动返回随机文件[开启上功能时使用,可不弹出提示]",
+		"assert()函数跳过[检测文件是否存在]",
+		"os.remove()函数跳过[防止删除文件]"
+		}, OSET.sets, {
+		"file",
+		"path",
+		"checkbox",
+		"checkbox",
+		
+		"number",
+		"number",
+		"text",
+		"text",
+		
+		"checkbox",
+		"checkbox",
+		"checkbox",
+		"checkbox",
+		"checkbox",
+		
+		"checkbox",
+		"checkbox",
+		"text",
+		"text",
+		"checkbox",
+		
+		"checkbox",
+		"checkbox",
+		"checkbox",
+		"checkbox",
+		"checkbox",
+		"checkbox"
+  })
+
+  
+		if OSET.info == nil then break end
+		
+		------------------------------------------InitializeInfomation----------------------------------------------------------
+		for i, v in ipairs(OSET.info) do OSET[OSET.setsList[i]] = v end
+		
+		if OSET.isUseRandomName then
+			math.randomseed(os.clock() * 9999)
+			for i = 1, 5 do
+			OSET.randomName = OSET.randomName .. string.char(math.random(65,90))
+			end
+		end
+		OSET.path = OSET.fullName:gsub("[^/]+$", "")
+		OSET.name = OSET.fullName:match("[^/]+$")
+		if OSET.outPath:sub(-1,-1) ~= "/" then
+			OSET.outPath = OSET.outPath .. "/"
+		end
+		-----------------------------------------------InitializeInfomation------------------------------------------------------
+		OSET.chunk = loadfile(OSET.fullName)--LoadMain
+		if OSET.chunk == nil then gg.alert("载入脚本错误,请检查脚本是否错误.") break end--CheckMain
+		
+		OSET.msg = OSET.msg .. "开始运行脚本,如有密码请输入密码,确保进入主功能界面.\n\n" 
+			local tr = {}--HookedFunctionList
+			local funlist = {{nil, nil}}--BlockLog
+			local loaded={}
+			if OSET.isHookGg then --gg
+				local funindex  = 1
+                local file = OSET.outPath .. "[拦截结果]" .. OSET.name .. OSET.randomName .. ".log"
+                OSET.outFile = OG.io.open(file, "w")
+                local  function append(A0_24)
+                  OSET.outFile:write(A0_24)
+                  OSET.outFile:flush()
+                end
+                append("----ONLY SSH拦截器.\n")
+                local function appendHook(A0_25)
+                  if OSET.nowFunction ~= "clearResults" or OSET.lastFunction ~= OSET.nowFunction then
+                    append(A0_25)
+                  end
+                  if funlist[funindex][1] ~= nil and OSET.nowFunction ~= "choice" and OSET.nowFunction ~= "multichoice" and (OSET.nowFunction ~= "clearResults" or OSET.lastFunction ~= OSET.nowFunction) then
+                    funlist[funindex][2] = OG.tostring(funlist[funindex][2]) .. A0_25
+                  end
+                end
+                local function closeFile()
+					OSET.outFile:close()
+                end
+				local names = {
+					setRanges = {'^REGION_'}, startFuzzy = {'^TYPE_', '0x%X', '0x%X'}, searchAddress = {nil, '0x%X', '^TYPE_', '^SIGN_[^F]', '0x%X', '0x%X'}, searchFuzzy = {nil, '^SIGN_FUZZY_', '^TYPE_', '0x%X', '0x%X'}, searchNumber = {nil, '^TYPE_', nil, '^SIGN_[^F]', '0x%X', '0x%X'}, loadList = {nil, '^LOAD_'}, saveList = {nil, '^SAVE_'}, editAll = {nil, '^TYPE_'}, copyMemory = {'0x%X', '0x%X'}, dumpMemory = {'0x%X', '0x%X'}} 
+				local rets = {
+					alert = 1, prompt = 1, choice = 1, multiChoice = 1} 
+				local toFlags =function (check, value) --valueToConstant
+						local ret = '' 
+						for k, v in pairs(OG.gg) do
+							if k:match(check) ~= nil and (value & v) == v then
+								if ret ~= '' then
+									ret = ret..' | '
+								end
+								ret = ret..'gg.'..k 
+								value = value & ~v
+							end
+						end
+						if ret == '' or value ~= 0 then
+							if ret ~= '' then
+								ret = ret..' | '
+							end 
+							ret = ret..value
+						end 
+					return ret
+				end 
+				for j, v in OG.pairs(OG.gg) do--HookEachGGMember
+					if OG.type(v) ~= "function" then --constants
+						if j == "PACKAGE" then _G.gg[j] = OSET.VPACKAGE
+						elseif j == "VERSION" then  _G.gg[j] = OSET.VVERSION
+						elseif j == "VERSION_INT" then  _G.gg[j] = OSET.getVERSION_INT()
+						elseif j == "BUILD" then  _G.gg[j] = OSET.VBUILD
+						end
+						else
+					end
+					if OG.type(v) == "function" then--functions
+						if OSET.ignoreHookGGFunction:match(j) == nil then
+							local orig = v--originalFunction
+							local name = j--nameOfFunction
+							
+							local hook=--FunctionToReplace
+							function(...)
+							local arg = {...}
+                            OSET.lastFunction = OSET.nowFunction
+							OSET.nowFunction = name
+							appendHook("gg." .. name .."(")
+							for c, a in OG.ipairs(arg) do --PrintEachArg
+								if c ~= 1 then
+									appendHook(', ')
+								end
+								if OG.type(a) == 'string' then
+									appendHook('"')
+								end 
+								local b = a
+								if OG.type(a) == 'number' and names[name] ~= nil and names[name][c] ~= nil then
+									local check = names[name][c]
+									if check:sub(1, 1) ~= '^' then
+										if a == 0 or a == -1 then
+											b = a
+										else 
+											b = check:format(a)
+										end
+									else 
+										b = toFlags(check, a)
+									end
+								end 
+								b =OG.tostring(b)
+								appendHook(b)
+								if OG.type(a) == 'string' then
+									appendHook('"')
+								end
+							end 
+							appendHook(")\n")
+							---returnReset
+                            local result = 1
+                            if OSET.ignoreInvokeGGFunction:match(name) then
+                                OG.gg.toast("已自动跳过函数gg." .. name .. "()的执行")
+                            elseif OSET.isUseRandomResult and (name=="getResults" or  name=="setRanges" or name=="editAll" or name=="clearResults" ) then
+								if name=="getResults" then
+									result=OG.math.random(100,1000)
+								else
+									result=true
+								end
+                            elseif name == "getFile" then
+                                result = OSET.fullName
+                           elseif name=="isPackageInstalled" then
+								if OSET.ignorePackage:match(arg[1]) then
+                                    result = false
+                                else
+									result=orig(...)
+								end
+							elseif name=="choice" then
+								local list=arg[1] 
+								local index=orig(...)
+								append("\n------"..list[index].."-------\n")
+								if funlist[funindex][2]==nil or funlist[funindex][2]=='' then
+									funlist[funindex][1]=list[index] 
+								elseif funlist[funindex][1]~=nil then
+									funindex=funindex+1 funlist[funindex]={nil,nil} funlist[funindex][1]=list[index]
+								end 
+								result= index
+							else
+								result=orig(...)
+							end
+							 return result
+						end
+					
+							tr[hook]=orig
+                             _G.gg[j] =hook
+					end
+					end
+				end
+				OSET.msg = OSET.msg .. "[GG拦截开启]拦截结果将写出到: " .. file.."\n\n"
+			end
+			if OSET.ignoreExit then --os.exit
+			OSET.msg = OSET.msg .. "[os.exit检测开启]\n\n" 
+				local orig= os.exit
+				local hook= 1
+                hook= function (...)
+					if OG.gg.alert("脚本正在调用函数os.exit()退出脚本,请选择返回结果", "允许退出", "禁止退出") == 2 then
+					else
+						onlyonly(666)--ToActivateAnError
+					end
+				end
+			end
+			if OSET.ignoreAntiHook then --string.dump 
+			OSET.msg = OSET.msg .. "[反Hook跳跃机制开启]\n\n" 
+				local orig = string.dump 
+				local hook = 1 
+				hook = function (...) local arg = {...}
+					if tr[arg[1]] ~= nil then
+						arg[1] = tr[arg[1]]
+					end 
+					return orig(arg[1], OG.select(2, ...))
+				end  
+				tr[hook] = orig 
+				string.dump = hook
+			end
+			if OSET.ignoreAntiHook then --tostring
+				local orig = tostring 
+				local hook = 1 
+				hook = function (...) 
+					local old = tostring 
+					local arg = {...}
+					if tr[arg[1]] ~= nil then
+						arg[1] = tr[arg[1]]
+					end 
+					local ret = orig(arg[1], OG.select(2, ...)) 
+					tostring = old 
+					return ret
+				end 
+				tr[hook] = orig 
+				tostring = hook
+			end
+			if OSET.ignoreAntiHook then --debug.getupvalue 
+				local orig = debug.getupvalue 
+				local hook = 1 
+				hook = function (...) 
+					local arg = {...}
+					if tr[arg[1]] ~= nil then
+						arg[1] = OG.tostring[arg[1]]
+					end 
+					return orig(arg[1], OG.select(2, ...))
+				end 
+				tr[hook] = orig 
+				debug.getupvalue = hook
+			end
+			if OSET.ignoreAntiHook then --debug.getinfo
+				local orig = debug.getinfo 
+				local hook = 1 
+				hook = function (...) 
+					local arg = {...}
+			--		print("getinfo:"..OG.tostring(arg))
+				local sum=1
+				local a=orig(sum)
+					while a do
+					sum=sum+1
+					a=orig(sum)
+					end
+					
+					--print("sum:"..sum.." "..arg[1])
+					
+					--print("prerec:"..arg[1])
+					if arg[1] ~= nil and arg[1] > 0  then
+						arg[1] = arg[1] + 1
+					end 
+					--print(arg[1])
+					
+					
+					--print("rec:"..arg[1])
+					local ret=1
+					if arg[1]<=sum-4 then
+					ret=orig(arg[1], OG.select(2, ...))
+					else
+			  ret=nil
+			  end
+					--print(ret)
+					return ret
+				end 
+				tr[hook] = orig 
+				debug.getinfo = hook
+			end
+            if OSET.ignoreRemove then --os.remove
+			OSET.msg = OSET.msg .. "[os.remove跳跃开启]\n\n" 
+				local orig = os.remove
+				local hook = 1 
+				hook = function (...) 
+					local arg = {...}
+					OG.gg.toast("已阻止文件"..arg[1].."的删除")
+					return true
+				end 
+				tr[hook] = orig 
+				os.remove = hook
+			end
+			if  OSET.ignoreAssert then --assert
+				OSET.msg = OSET.msg .. "[assert跳跃开启]\n\n" 
+				local orig = assert
+				local hook = 1 
+				hook = function (...) 
+					local arg = {...}
+					OG.gg.toast("已阻止一个文件的存在检测")
+					return true
+				end 
+				tr[hook] = orig 
+				os.remove = hook
+			end
+			if OSET.ignoreIo then --io.open
+				OSET.msg = OSET.msg .. "[文件操作检测开启]\n\n" 
+				local orig = io.open
+				local hook = 1 
+				hook = function (...) 
+					local arg = {...}
+					local todo = 1
+                    if OSET.ignoreWrite == false then
+                        todo = OG.gg.alert("脚本尝试访问文件" .. arg[1] .. ",请选择执行结果", "返回随机文件", "返回nil", "忽略")
+					end
+					if todo == 1 then
+						file=orig(OSET.outPath .. OSET.randomName, "w")
+						file:write(OSET.randomName)
+						file:close()
+                        return orig(OSET.outPath .. OSET.randomName, arg[2])
+                    elseif todo == 2 then
+                        return nil
+                    else
+                        return orig(...)
+                    end
+					return true
+				end 
+				tr[hook] = orig 
+				io.open = hook
+			end 
+			if OSET.isHookLoad then --load 
+			OSET.msg = OSET.msg .. "[Load导出开启]如导出脚本已编译请使用反编译工具解密\n\n" 
+				local orig = load
+				local hook = 1 
+				hook = function (...) 
+					local arg = {...}
+					local result= orig(...)
+					local data=OG.tostring(arg[1])
+					if result then
+						--print("load")
+					--	print(data)
+						if  OSET.isHookLoadOpt == false or
+						
+
+						loaded[arg[1]]==nil then
+							--		print("startwrite")
+						
+							OSET.loadTimes = OSET.loadTimes + 1
+							loaded[arg[1]]=OSET.loadTimes
+                            file=OG.io.open(OSET.outPath .. "[LOAD" .. OSET.loadTimes .. "]" .. OSET.name .. OSET.randomName .. ".lua", "w")
+							file:write(data)
+							file:close()
+						end
+					end
+					return result
+				end 
+				tr[hook] = orig 
+				load = hook
+			end
+			if OSET.isHookPcall then --pcall
+			OSET.msg = OSET.msg .. "[Pcall导出开启]如导出脚本已编译请使用反编译工具解密\n\n" 
+				local orig = pcall
+				local hook = 1 
+				hook = function (...) 
+					local arg = {...}
+					local data=OG.tostring(arg[1])
+					if arg[1] then
+						if  OSET.isHookLoadOpt == false or data:match("searchNumber") then
+							OSET.loadTimes = OSET.loadTimes + 1
+                            file=OG.io.open(OSET.outPath .. "[PCALL" .. OSET.loadTimes .. "]" .. OSET.name .. OSET.randomName .. ".lua", "w")
+							file:write(data)
+							file:close()
+						end
+					end
+					return orig(...)
+				end 
+				tr[hook] = orig 
+				pcall = hook
+			end
+			if OSET.isHookLoadfile then --loadfile
+			OSET.msg = OSET.msg .. "[Loadfile导出开启]如导出脚本已编译请使用反编译工具解密\n\n" 
+				local orig = loadfile
+				local hook = 1 
+				hook = function (...) 
+					local arg = {...}
+					local result= orig(...)
+					local f=OG.io.open(arg[1], "r")
+					local data=f:read('*a')
+					f:close()
+					if result then
+						if  (OSET.isHookLoadOpt == false or data:match("searchNumber") or  data:match("load")) and loaded[arg[1]]==nil then
+							OSET.loadTimes = OSET.loadTimes + 1
+							loaded[arg[1]]=OSET.loadTimes
+                            file=OG.io.open(OSET.outPath .. "[LOADFILE" .. OSET.loadTimes .. "]" .. OSET.name .. OSET.randomName .. ".lua", "w")
+							file:write(data)
+							file:close()
+						end
+					end
+					return result
+				end 
+				tr[hook] = orig 
+				loadfile = hook
+			end
+						if OSET.isHookDofile then --loadfile
+			OSET.msg = OSET.msg .. "[Dofile导出开启]如导出脚本已编译请使用反编译工具解密\n\n" 
+				local orig = dofile
+				local hook = 1 
+				hook = function (...) 
+					local arg = {...}
+					local result= true
+					local f=OG.io.open(arg[1], "r")
+					local data=f:read('*a')
+					f:close()
+					if result then
+						if  (OSET.isHookLoadOpt == false or data:match("searchNumber") or  data:match("load")) and loaded[arg[1]]==nil then
+							OSET.loadTimes = OSET.loadTimes + 1
+							loaded[arg[1]]=OSET.loadTimes
+                            file=OG.io.open(OSET.outPath .. "[DOFILE" .. OSET.loadTimes .. "]" .. OSET.name .. OSET.randomName .. ".lua", "w")
+							file:write(data)
+							file:close()
+						end
+					end
+					return orig(...)
+				end 
+				tr[hook] = orig 
+				dofile = hook
+			end
+		
+			--OG.gg.alert(OSET.msg)--AlertMessage
+			
+			local function catch(e)
+				if OSET.isDebug then
+					OG.print("------------------------------")
+					OG.print("debug:\n")
+					OG.print(e.."\n")
+					OG.print(debug.traceback())
+					OG.print("------------------------------")
+				end
+			end
+		--	print(OSET.chunk)
+			xpcall(OSET.chunk,catch)--CallMain
+--OSET.chunk()
+			
+			if OSET.outFile~=nil then OSET.outFile:close() end --CloseFile
+			
+			--print(funlist)
+			
+			if OSET.isCreateLua and funlist~=nil and funlist[1]~=nil and funlist[1][1]~=nil then --createLua
+				local function CreateLuaText(fl) 
+					local str =function(s)
+						local ss= OG.tostring(s)
+						if ss=='nil' then
+							ss=''
+						end 
+						ss=ss:gsub('^nil','')
+						return ss
+					end
+					fl[#fl+1]={'退出脚本','print("Create By Only Hook Tools")\nos.exit()\n'} local result='gg.alert("本脚本由OnlySSH拦截器生成")\nfunction Main()\nmenu = gg.choice({' 
+					local index=1 
+					for index=1,#fl do 
+						result=result..'"' result=result..fl[index][1] result=result..'"'
+						if index~=#fl then
+							result=result..','
+						end
+					end 
+					result=result..'},nil,"选择开启功能[By Only SSH]")\n' 
+					for index=1,#fl do 
+						result=result..'if menu=='..index..' then '
+						if index==#fl then
+							result=result..'Exit()end\n'
+						else 
+						result=result..'F'..index..'()end\n'
+						end
+					end 
+					result=result..'vis=false\nend\n' 
+					for index=1,#fl do 
+						result=result..'\n-----'..fl[index][1]..'-----\nfunction '
+						if index==#fl then
+							result=result..'Exit()\n'
+						else 
+							result=result..'F'..index..'()\n'
+						end 
+						result=result..str(fl[index][2])..'end\n'
+					end 
+					result=result..'\nMain() \nwhile(true)do\n if gg.isVisible(true) then\n vis=true \n gg.setVisible(false) \n end \n gg.clearResults()\n if vis then\n Main() \nend \nend' 
+					return result
+				end 
+				local luas=CreateLuaText(funlist)
+				local file=OG.io.open(OSET.outPath .. "[自动创建脚本]" .. OSET.name .. OSET.randomName .. ".lua", "w+")
+				file:write(luas)
+				file:close()
+			end 
+			
+			OG.print("END\n\n运行结束,拦截结果已生成.\n\nQQ交流群:464257898\n")
+		break
+end
+end
+chunk()

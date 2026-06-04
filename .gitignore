@@ -1,0 +1,13 @@
+.log/
+.well-known/acme-challenge/
+app/cache/
+*.log
+*.zip
+*.bak
+mysql.sql
+send.json
+lua/send.json
+chat_api.txt
+lua/chat_api.txt
+jb.txt
+times.txt

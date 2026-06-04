@@ -1,0 +1,46 @@
+{% extends "layouts/app.twig" %}
+
+{% block content %}
+    {% include "components/header.twig" %}
+
+    <div id="content" class="flex flex-col flex-grow container mx-auto px-4">
+        <div class="my-4">
+            <div class="flex justify-between font-bold p-4">
+                <div class="flex-grow font-mono mr-2">
+                    {{ translate('file.name') }}
+                </div>
+
+                <div class="font-mono text-right w-1/6 mx-2 hidden sm:block">
+                    {{ translate('file.size') }}
+                </div>
+
+                <div class="font-mono text-right w-1/4 ml-2 hidden sm:block">
+                    {{ translate('file.date') }}
+                </div>
+            </div>
+
+            <ul id="file-list">
+                <li>
+                    {% if path and path != '.' %}
+                        {{ include('components/file.twig', { parentDir: true }) }}
+                    {% endif %}
+                </li>
+
+                <li>
+                    {% for file in files %}
+                        {{ include('components/file.twig') }}
+                    {% endfor %}
+                </li>
+            </ul>
+        </div>
+
+        {% if readme %}
+            {% include 'components/readme.twig' %}
+        {% endif %}
+    </div>
+
+    {% include 'components/footer.twig' %}
+
+    {% include 'components/scroll-to-top.twig' %}
+    <file-info-modal ref="fileInfoModal"></file-info-modal>
+{% endblock %}
