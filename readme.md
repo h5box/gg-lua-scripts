@@ -1,4 +1,4 @@
-# GG Lua Scripts 历史归档
+# GG Lua Scripts（原GG脚本大师） 历史归档
 
 GitHub: https://github.com/h5box/gg-lua-scripts
 
