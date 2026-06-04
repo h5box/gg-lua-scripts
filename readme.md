@@ -1,5 +1,7 @@
 # GG脚本库-使用帮助
 
+GitHub: https://github.com/h5box/gg-lua-scripts
+
 ## 简要说明：
 - 所有脚本来自网友上传，仅供学习，本站不对脚本负责。
 - 项目包含 PHP 站点入口、Lua 云脚本接口和按游戏分类的脚本归档。
