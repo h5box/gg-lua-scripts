@@ -1,7 +1,8 @@
 # 项目导航
-- GG 脚本库站点，收集 GameGuardian Lua 脚本并提供 PHP 上传/下载入口。
-- 根入口：`index.php` 上传与 Lua 云脚本加载，`api.php`/`download.php` 提供查询下载。
-- `lua/` 是云脚本接口模块，依赖根目录 `conn.php` 和 `func.php`。
+- 2020 年 GG 脚本库历史归档，保存 GameGuardian Lua 脚本和旧 PHP 站点源码。
+- 原域名 `gg.kuaibiji.info` 已不可用；代码中的 URL 仅作历史引用。
+- 根入口：`index.php` 旧上传与 Lua 片段入口，`api.php`/`download.php` 旧查询下载接口。
+- `lua/` 是旧云脚本接口模块，依赖根目录 `conn.php` 和 `func.php`。
 - `app/` 是 PHP 文件浏览器前端，含 `src/`、`views/`、`config/`、`vendor/`。
 - 脚本按游戏中文目录归档；文件名通常含日期前缀和脚本名。
 
@@ -13,6 +14,7 @@
 
 # 项目约束
 - 不擅自修改脚本内容；仅在明确要求时调整 PHP/Lua 功能。
+- 项目按历史归档维护，不把旧线上功能描述为当前可用服务。
 - 公开发布时忽略运行日志、缓存、ACME 验证文件和临时备份产物。
 - `conn.php` 当前为空数据库占位；真实部署凭据不得提交。
 - 无 Composer 清单，`app/vendor` 暂视为运行所需依赖，不自动删除。
@@ -23,3 +25,5 @@
 - 06-04 21:15 `.log/` 与 `.well-known/acme-challenge/` 判定为服务器运行残留。
 - 06-04 21:15 运行计数、聊天中转和临时上传文本改为不提交。
 - 06-04 22:05 GitHub 仓库更名为 `h5box/gg-lua-scripts`。
+- 06-04 22:07 用户确认原域名早已不可用，项目是 2020 年历史归档。
+- 06-04 22:07 `[GG脚本库]在线运行.lua` 已不可用，且当时做过加密处理。
